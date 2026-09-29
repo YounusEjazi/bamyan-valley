@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bamyan Valley</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <!-- loading -->
+    <div id="loading">
+      <div class="title">Bamyan Valley</div>
+      <div class="bar"><div id="progress"></div></div>
+      <div id="loading-text">Loading…</div>
+    </div>
+
+    <!-- start / pause menu -->
+    <div id="menu" hidden>
+      <div class="card">
+        <h1>Bamyan Valley</h1>
+        <p class="lead">Explore the valley of the Buddhas: walk the fields and the town below the
+          cliff, climb to the niches and find all <span id="menu-total">14</span> places.</p>
+        <button id="play" class="primary">Click to explore</button>
+        <div class="menu-row">
+          <button id="open-journal">Journal <span id="menu-found"></span></button>
+          <button id="open-settings">Viewpoints &amp; sun</button>
+        </div>
+        <div class="controls">
+          <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move</div>
+          <div><kbd>Mouse</kbd> look</div>
+          <div><kbd>Shift</kbd> run / fly fast</div>
+          <div><kbd>Space</kbd> jump / fly up</div>
+          <div><kbd>F</kbd> walk ⇄ fly</div>
+          <div><kbd>C</kbd> fly down</div>
+          <div><kbd>J</kbd> journal</div>
+          <div><kbd>Esc</kbd> menu</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- journal -->
+    <div id="journal" class="sheet" hidden>
+      <div class="sheet-head">
+        <h2>Journal</h2><span id="journal-progress"></span>
+        <button class="close" data-close="journal">✕</button>
+      </div>
+      <ul id="journal-list"></ul>
+      <div class="sheet-foot"><button id="reset-progress">Reset progress</button></div>
+    </div>
+
+    <!-- viewpoints & sun -->
+    <div id="settings" class="sheet" hidden>
+      <div class="sheet-head"><h2>Viewpoints &amp; sun</h2><button class="close" data-close="settings">✕</button></div>
+      <h3>Viewpoints</h3>
+      <div id="views" class="buttons"></div>
+      <h3>Sun</h3>
+      <div class="buttons">
+        <button data-sun="photo">Midday</button>
+        <button data-sun="late_afternoon">Late afternoon</button>
+      </div>
+      <label>Azimuth <span id="az-val"></span><input id="sun-az" type="range" min="60" max="300" step="1" /></label>
+      <label>Elevation <span id="el-val"></span><input id="sun-el" type="range" min="2" max="80" step="1" /></label>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud" hidden>
+      <div id="compass"><div id="compass-strip"></div><div class="needle"></div></div>
+      <div id="status">
+        <div><span class="label">Discovered</span> <b id="found-count">0 / 0</b></div>
+        <div><span class="label">Mode</span> <b id="mode">Walk</b> <span class="muted">(F)</span></div>
+      </div>
+      <div id="crosshair"></div>
+      <div id="toast" hidden></div>
+    </div>
+
+    <div id="credits">
+      Terrain: Copernicus DEM GLO-30 · Contains modified Copernicus Sentinel data 2025 ·
+      Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors
+    </div>
+  </body>
+  <script type="module" src="./src/main.js"></script>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "bamyan-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/copy-draco.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/copy-draco.mjs",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.186.1",
+    "three-mesh-bvh": "^0.9.15"
+  },
+  "devDependencies": {
+    "vite": "^6.4.3"
+  }
+}

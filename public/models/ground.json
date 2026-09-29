@@ -1,0 +1,21 @@
+{
+  "valley": {
+    "bounds": [
+      -9035.8,
+      -5588.76,
+      9384.2,
+      5721.24
+    ],
+    "file": "textures/valley.jpg"
+  },
+  "core": {
+    "bounds": [
+      -2600.0,
+      -3200.0,
+      4600.0,
+      1200.0
+    ],
+    "file": "textures/core.jpg"
+  },
+  "credit": "Contains modified Copernicus Sentinel data 2025; (c) OpenStreetMap contributors"
+}

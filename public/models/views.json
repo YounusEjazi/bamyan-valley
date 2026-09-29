@@ -1,0 +1,101 @@
+{
+  "views": {
+    "photo": {
+      "label": "Photo viewpoint",
+      "position": [
+        595.28,
+        2582.27,
+        2221.63
+      ],
+      "target": [
+        118.87,
+        2519.74,
+        -28.79
+      ],
+      "hfov": 11.911
+    },
+    "south": {
+      "label": "3 km south",
+      "position": [
+        0.0,
+        2814.14,
+        3000.0
+      ],
+      "target": [
+        0.0,
+        2509.76,
+        -0.0
+      ],
+      "hfov": 39.598
+    },
+    "overview": {
+      "label": "Valley overview",
+      "position": [
+        -2500.0,
+        6500.0,
+        9000.0
+      ],
+      "target": [
+        500.0,
+        2550.0,
+        -200.0
+      ],
+      "hfov": 60.0
+    },
+    "niche": {
+      "label": "Big niche",
+      "position": [
+        25.0,
+        2534.76,
+        260.0
+      ],
+      "target": [
+        0.0,
+        2538.76,
+        -0.0
+      ],
+      "hfov": 55.0
+    }
+  },
+  "start": "south",
+  "player_start": {
+    "position": [
+      30.0,
+      2509.76,
+      110.0
+    ],
+    "look_at": [
+      0.0,
+      2538.76,
+      -0.0
+    ]
+  },
+  "niche": [
+    0.0,
+    2509.76,
+    -0.0
+  ],
+  "sun": {
+    "photo": [
+      215.0,
+      55.0
+    ],
+    "late_afternoon": [
+      245.0,
+      25.0
+    ]
+  },
+  "haze": {
+    "color": [
+      0.46,
+      0.44,
+      0.38
+    ],
+    "distance": 16000.0
+  },
+  "cliff_center": [
+    388.81,
+    2578.82,
+    -92.15
+  ]
+}

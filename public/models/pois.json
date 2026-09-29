@@ -1,0 +1,184 @@
+[
+  {
+    "id": "big_niche",
+    "title": "The Great Buddha niche",
+    "subtitle": "Salsal, the Western Buddha",
+    "text": "This 58 m niche held the Western Buddha, about 55 m tall and carved around 618 CE. The figure was hewn from the cliff; its details were modelled in mud mixed with straw and coated with stucco. It was blown up by the Taliban in March 2001.",
+    "hint": "The tallest opening in the cliff.",
+    "radius": 55,
+    "source": "https://en.wikipedia.org/wiki/Buddhas_of_Bamiyan",
+    "position": [
+      0,
+      35
+    ]
+  },
+  {
+    "id": "small_niche",
+    "title": "The Small Buddha niche",
+    "subtitle": "Shamama, the Eastern Buddha",
+    "text": "The Eastern Buddha stood about 38 m tall and was carved around 570 CE, decades before its larger neighbour. It was destroyed together with the Western Buddha in 2001.",
+    "hint": "About 800 m east of the Great Buddha, in the same cliff.",
+    "radius": 55,
+    "source": "https://en.wikipedia.org/wiki/Buddhas_of_Bamiyan",
+    "position": [
+      786.4,
+      -186.2
+    ]
+  },
+  {
+    "id": "caves",
+    "title": "Cave monasteries",
+    "subtitle": "The honeycombed cliff",
+    "text": "Some 700 caves were cut into the cliff: sanctuaries, monks' cells, halls and storerooms of a huge Buddhist monastic complex. Many were once painted, and several are linked by galleries and stairways.",
+    "hint": "Between the two Buddhas, at the foot of the cliff.",
+    "radius": 70,
+    "source": "https://ahnp.ub.uni-heidelberg.de/journals/monsites/article/download/22885/16648/0",
+    "position": [
+      420,
+      -140
+    ]
+  },
+  {
+    "id": "tank",
+    "title": "Tank wreck",
+    "subtitle": "Traces of war",
+    "text": "A rusting armoured vehicle below the Great Buddha - one of many wrecks left around the valley by Afghanistan's decades of war.",
+    "hint": "Something made of steel, just in front of the Great Buddha.",
+    "radius": 35,
+    "source": "https://www.openstreetmap.org/",
+    "position": [
+      -8,
+      149
+    ]
+  },
+  {
+    "id": "shrine",
+    "title": "Shrine of Mir Sayed Ali Yakhsoz",
+    "subtitle": "A local shrine",
+    "text": "A small local shrine at the foot of the Buddha cliff. Two old tombs lie a little to the west.",
+    "hint": "A small holy place near the road below the cliff.",
+    "radius": 40,
+    "source": "https://www.openstreetmap.org/",
+    "position": [
+      434,
+      132
+    ]
+  },
+  {
+    "id": "remains",
+    "title": "Archaeological remains",
+    "subtitle": "West of the Great Buddha",
+    "text": "Remains of the Buddhist monastery extend west along the cliff. The whole valley is protected as the UNESCO World Heritage site 'Cultural Landscape and Archaeological Remains of the Bamiyan Valley', inscribed in 2003.",
+    "hint": "Follow the cliff west of the Great Buddha.",
+    "radius": 70,
+    "source": "https://whc.unesco.org/en/list/208/",
+    "position": [
+      -581,
+      -28
+    ]
+  },
+  {
+    "id": "cave_view",
+    "title": "Cave monastery viewpoint",
+    "subtitle": "6th century",
+    "text": "A cave monastery dated to the 6th century. From here the valley opens out towards the Koh-i-Baba mountains in the south.",
+    "hint": "High up, north-west of the Great Buddha.",
+    "radius": 70,
+    "source": "https://www.openstreetmap.org/",
+    "position": [
+      -804,
+      -257
+    ]
+  },
+  {
+    "id": "cliff_top",
+    "title": "Top of the cliff",
+    "subtitle": "Above the Great Buddha",
+    "text": "The cliff runs for more than 1.3 km and rises up to about 150 m. From its edge you look straight down on the niche, the fields and the town. Watch your step.",
+    "hint": "Climb or fly up above the Great Buddha.",
+    "radius": 45,
+    "source": "https://ahnp.ub.uni-heidelberg.de/journals/monsites/article/download/22885/16648/0",
+    "position": [
+      20,
+      -95
+    ]
+  },
+  {
+    "id": "river",
+    "title": "Bamian River",
+    "subtitle": "The valley's lifeline",
+    "text": "The river winds along the valley floor between rows of willows and poplars. Its water, led through channels, irrigates the small fields of wheat and potatoes that cover almost all the flat ground.",
+    "hint": "Walk south from the cliff, through the fields.",
+    "radius": 45,
+    "source": "https://en.wikipedia.org/wiki/Bamyan",
+    "position": [
+      749.6,
+      620.2
+    ]
+  },
+  {
+    "id": "fields",
+    "title": "Fields and poplar rows",
+    "subtitle": "Farming the valley floor",
+    "text": "Nearly every flat patch of the valley is farmed. Tall, narrow poplars grow in rows along channels, tracks and field edges and give the valley its character.",
+    "hint": "Between the cliff road and the river.",
+    "radius": 70,
+    "source": "https://en.wikipedia.org/wiki/Bamyan",
+    "position": [
+      640,
+      330
+    ]
+  },
+  {
+    "id": "bazaar",
+    "title": "Bamyan bazaar",
+    "subtitle": "The town centre",
+    "text": "Bamyan's market street, lined with shops, guest houses and restaurants, is the busy heart of the town.",
+    "hint": "The market town lies south-east of the Buddhas, along the river.",
+    "radius": 110,
+    "source": "https://en.wikipedia.org/wiki/Bamyan",
+    "position": [
+      1712,
+      806
+    ]
+  },
+  {
+    "id": "ghulghula",
+    "title": "Shahr-i Ghulghula",
+    "subtitle": "The City of Screams",
+    "text": "The ruins of a fortified town on a hill in the middle of the valley. According to tradition it was destroyed by Genghis Khan's army in 1221, and the name recalls the screams of its people.",
+    "hint": "Ruins on a hill south-east of the Buddhas.",
+    "radius": 110,
+    "source": "https://whc.unesco.org/en/list/208/",
+    "position": [
+      1872,
+      1307
+    ]
+  },
+  {
+    "id": "photo_view",
+    "title": "The classic view",
+    "subtitle": "The terrace south of the valley",
+    "text": "From the terrace on the south side, the whole Buddha cliff lines up across the fields and the town - the view in countless photographs.",
+    "hint": "Look back at the cliff from the high ground across the valley.",
+    "radius": 80,
+    "source": "https://en.wikipedia.org/wiki/Buddhas_of_Bamiyan",
+    "position": [
+      595,
+      2222
+    ]
+  },
+  {
+    "id": "kakrak",
+    "title": "Kakrak valley",
+    "subtitle": "A side valley",
+    "text": "A side valley south-east of Bamyan with its own cave complex and a smaller Buddha niche; it is part of the World Heritage property.",
+    "hint": "A side valley to the south-east.",
+    "radius": 150,
+    "source": "https://whc.unesco.org/en/list/208/",
+    "position": [
+      3066,
+      2526
+    ]
+  }
+]
