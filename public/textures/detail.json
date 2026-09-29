@@ -1,0 +1,25 @@
+{
+  "source": "Poly Haven (CC0)",
+  "maps": {
+    "rock": {
+      "file": "textures/detail_rock.jpg",
+      "asset": "cliff_side",
+      "mean": 0.3404
+    },
+    "dry": {
+      "file": "textures/detail_dry.jpg",
+      "asset": "dry_ground_rocks",
+      "mean": 0.3095
+    },
+    "grass": {
+      "file": "textures/detail_grass.jpg",
+      "asset": "sparse_grass",
+      "mean": 0.2217
+    },
+    "plaster": {
+      "file": "textures/detail_plaster.jpg",
+      "asset": "clay_plaster",
+      "mean": 0.3582
+    }
+  }
+}
