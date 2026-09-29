@@ -203,10 +203,11 @@ function showSheet(id) {
   setPlaying(false);
 }
 
-function closeSheet(id) {
+function closeSheet(id, resume = true) {
   $(id).hidden = true;
   if (sheetFrom === "menu" || !started) openMenu();
-  else engage();
+  else if (resume) engage();
+  else setPlaying(false);
 }
 document.querySelectorAll("[data-close]").forEach((b) => { b.onclick = () => closeSheet(b.dataset.close); });
 
@@ -217,11 +218,16 @@ function engage() {
     setPlaying(true);
     return;
   }
-  try {
-    const p = renderer.domElement.requestPointerLock?.();
-    if (p?.catch) p.catch(() => setPlaying(true));
-  } catch {
+  // no pointer lock at all (rare): play with the keyboard; refused (no gesture): stay paused
+  if (!renderer.domElement.requestPointerLock) {
     setPlaying(true);
+    return;
+  }
+  try {
+    const p = renderer.domElement.requestPointerLock();
+    if (p?.catch) p.catch(() => setPlaying(false));
+  } catch {
+    setPlaying(false);
   }
 }
 
@@ -337,7 +343,7 @@ async function init() {
     }
     // the first Esc frees the mouse (browser), a second one opens the menu
     if (e.code === "Escape" && started && !playing) {
-      if (sheetOpen()) closeSheet(!$("journal").hidden ? "journal" : "settings");
+      if (sheetOpen()) closeSheet(!$("journal").hidden ? "journal" : "settings", false);
       else if (!menuOpen) openMenu();
     }
     if (e.code === "KeyM") {
