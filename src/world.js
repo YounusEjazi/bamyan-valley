@@ -14,6 +14,55 @@ THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 const BASE = "./";
 
+// Per-vertex (base height, roof height, random seed) of the building each vertex belongs
+// to: vertices are welded by position and triangles joined into buildings (union-find).
+// The building shader places floors, windows and doors with it.
+function buildingAttributes(mesh) {
+  const geo = mesh.geometry;
+  const pos = geo.attributes.position;
+  const n = pos.count;
+  const v = new THREE.Vector3();
+  const wy = new Float32Array(n), wx = new Float32Array(n), wz = new Float32Array(n);
+  const weld = new Map();
+  const rep = new Int32Array(n);
+  for (let i = 0; i < n; i++) {
+    v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld);
+    wx[i] = v.x;
+    wy[i] = v.y;
+    wz[i] = v.z;
+    const k = `${Math.round(v.x * 10)},${Math.round(v.y * 10)},${Math.round(v.z * 10)}`;
+    const r = weld.get(k);
+    if (r === undefined) weld.set(k, (rep[i] = i));
+    else rep[i] = r;
+  }
+  const parent = Int32Array.from({ length: n }, (_, i) => i);
+  const find = (x) => {
+    while (parent[x] !== x) x = parent[x] = parent[parent[x]];
+    return x;
+  };
+  const idx = geo.index ? geo.index.array : Int32Array.from({ length: n }, (_, i) => i);
+  for (let t = 0; t < idx.length; t += 3) {
+    const a = find(rep[idx[t]]), b = find(rep[idx[t + 1]]), c = find(rep[idx[t + 2]]);
+    parent[a] = b;
+    parent[find(c)] = find(b);
+  }
+  const lo = new Map(), hi = new Map(), cx = new Map();
+  for (let i = 0; i < n; i++) {
+    const r = find(rep[i]);
+    lo.set(r, Math.min(lo.get(r) ?? Infinity, wy[i]));
+    hi.set(r, Math.max(hi.get(r) ?? -Infinity, wy[i]));
+    if (!cx.has(r)) cx.set(r, Math.abs(Math.sin(wx[i] * 12.9898 + wz[i] * 78.233) * 43758.5453) % 1);
+  }
+  const out = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const r = find(rep[i]);
+    out[i * 3] = lo.get(r);
+    out[i * 3 + 1] = hi.get(r);
+    out[i * 3 + 2] = cx.get(r);
+  }
+  geo.setAttribute("aBld", new THREE.BufferAttribute(out, 3));
+}
+
 export async function loadWorld(renderer, tier, onStatus) {
   const manager = new THREE.LoadingManager();
   const draco = new DRACOLoader(manager).setDecoderPath(`${BASE}draco/`);
@@ -72,6 +121,7 @@ export async function loadWorld(renderer, tier, onStatus) {
   const root = new THREE.Group();
   root.add(terrainG.scene, cliffG.scene, buildingsG.scene);
   root.updateMatrixWorld(true);
+  for (const m of buildings) buildingAttributes(m);
 
   // raycast helpers
   const solids = [...terrain, ...cliff, ...buildings];
