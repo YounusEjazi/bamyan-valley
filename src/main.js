@@ -296,7 +296,7 @@ async function init() {
   document.querySelectorAll("[data-sun]").forEach((b) => { b.onclick = () => setSun(...world.config.sun[b.dataset.sun]); });
   $("sun-az").oninput = (e) => setSun(+e.target.value, sunState.el);
   $("sun-el").oninput = (e) => setSun(sunState.az, +e.target.value);
-  setSun(...world.config.sun.photo);
+  setSun(...(world.config.sun.late_afternoon || world.config.sun.photo));   // long shadows show the cliff best
 
   // graphics quality (reloads) and sound
   const q = $("quality");
