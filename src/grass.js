@@ -6,22 +6,24 @@ import * as THREE from "three";
 import { withAtmosphere } from "./atmosphere.js";
 
 const CHUNK = 32;
-const MAX_PER_CHUNK = 1500;
+const MAX_PER_CHUNK = 2200;
 const FRESH = new THREE.Color(0.085, 0.16, 0.032);   // summer crops / meadow (linear)
 
 function tuftGeometry() {
-  // seven curved, tapering blades per tuft (unit height), base at y = 0
+  // eleven thin, curved, tapering blades per tuft (unit height), base at y = 0
   const pos = [], col = [], idx = [];
-  const blades = 7;
+  const blades = 11;
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
   for (let i = 0; i < blades; i++) {
-    const a = (i / blades) * Math.PI * 2 + 0.4 * Math.sin(i * 7.1);
-    const spread = 0.05 + 0.06 * ((i * 17) % 4) / 4;
+    const a = rnd() * Math.PI * 2;
+    const spread = 0.02 + 0.13 * Math.sqrt(rnd());
     const ox = Math.cos(a) * spread, oz = Math.sin(a) * spread;      // blades spread around the tuft
-    const w = 0.026 + 0.014 * ((i * 37) % 5) / 5;                     // half blade width at the base
+    const w = 0.011 + 0.008 * rnd();                                   // half blade width at the base
     const dx = -Math.sin(a) * w, dz = Math.cos(a) * w;
-    const lean = 0.35 + 0.25 * ((i * 13) % 3) / 3;
-    const h = 0.75 + 0.25 * ((i * 29) % 4) / 4;
-    const bend = (y) => 1 + lean * y * y * 5;                        // blades curve outward
+    const lean = 0.2 + 0.5 * rnd();
+    const h = 0.55 + 0.45 * rnd();
+    const bend = (y) => 1 + lean * y * y * 4;                         // blades curve outward
     const v = [
       [ox - dx, 0, oz - dz], [ox + dx, 0, oz + dz],
       [ox * bend(0.55) - dx * 0.6, 0.55 * h, oz * bend(0.55) - dz * 0.6],
@@ -29,10 +31,11 @@ function tuftGeometry() {
       [ox * bend(1), h, oz * bend(1)],
     ];
     const base = pos.length / 3;
+    const tone = 0.8 + 0.4 * rnd();
     for (const [x, y, z] of v) {
       pos.push(x, y, z);
-      const s = 0.35 + 0.75 * y;           // dark at the root, light at the tip
-      col.push(s, s, s);
+      const s = (0.3 + 0.8 * y) * tone;    // dark at the root, light at the tip
+      col.push(s, s, s * (0.9 + 0.2 * y));
     }
     idx.push(base, base + 1, base + 3, base, base + 3, base + 2, base + 2, base + 3, base + 4);
   }
@@ -117,9 +120,9 @@ export class Grass {
       if (g <= 0 || rnd() > g) continue;
       const y = this.world.groundHeight(x, z, this.world.groundOnly, 6000);
       if (y === null) continue;
-      const hgt = 0.28 + rnd() * 0.55 * (0.5 + g);
+      const hgt = 0.22 + rnd() * 0.45 * (0.5 + g);
       q.setFromAxisAngle(up, rnd() * Math.PI * 2);
-      const wdt = 0.8 + rnd() * 0.7;
+      const wdt = 0.9 + rnd() * 0.8;
       m.compose(p.set(x, y - 0.04, z), q, s.set(wdt, hgt, wdt));
       mesh.setMatrixAt(k, m);
       // the ground colour, lifted and pulled toward fresh green, with some variation

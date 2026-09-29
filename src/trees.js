@@ -31,7 +31,7 @@ function poplarRadius(y) {
 }
 const ROUND = [null, { cy: 0.62, rx: 0.46, ry: 0.33 }, { cy: 0.62, rx: 0.4, ry: 0.32 }];
 const CARDS = [{ n: 92, size: 0.085 }, { n: 84, size: 0.22 }, { n: 70, size: 0.2 }];
-const CROWN = [[0.045, 0.1, 0.028], [0.085, 0.13, 0.045], [0.07, 0.115, 0.035]].map((c) => new THREE.Color(...c));
+const CROWN = [[0.06, 0.13, 0.034], [0.1, 0.15, 0.05], [0.085, 0.14, 0.042]].map((c) => new THREE.Color(...c));
 const TRUNK = new THREE.Color(0.1, 0.075, 0.055);
 
 // ------------------------------------------------------------------ leaf texture
@@ -303,7 +303,7 @@ ${SWAY_GLSL}`)
       .replace("#include <project_vertex>", swayProject());
     shader.fragmentShader = shader.fragmentShader
       .replace("#include <common>", "#include <common>\nvarying float vCore;")
-      .replace("#include <color_fragment>", "#include <color_fragment>\n  diffuseColor.rgb *= 1.0 - 0.45 * vCore;");
+      .replace("#include <color_fragment>", "#include <color_fragment>\n  diffuseColor.rgb *= 1.0 - 0.3 * vCore;");
   });
 }
 

@@ -84,8 +84,8 @@ export class Pipeline {
       uRays: { value: 0.55 },
       uSunTint: { value: new THREE.Color(1, 0.85, 0.65) },
       uExposure: { value: 1.0 },
-      uWhite: { value: new THREE.Vector3(1.05, 1.0, 0.92) },   // warm white balance
-      uSaturation: { value: 1.1 },
+      uWhite: { value: new THREE.Vector3(1.04, 1.0, 0.94) },   // warm white balance
+      uSaturation: { value: 1.04 },
       uContrast: { value: 0.22 },
       uVignette: { value: 0.35 },
       uGrain: { value: 0.022 },

@@ -151,7 +151,9 @@ vec2 boundsUV( vec2 p, vec4 b ) { return ( p - b.xy ) / ( b.zw - b.xy ); }`)
     detailN = normalize( mix( detailN, r.n, rockW ) );
   }
   detailN = normalize( mix( nGeo, detailN, detailNear ) );
-  vec3 baseCol = mix( ground, vcol, rockMask );
+  // the baked cliff palette is a little too saturated next to the photos
+  vec3 rockCol = mix( vec3( dot( vcol, vec3( 0.2126, 0.7152, 0.0722 ) ) ), vcol, 0.72 );
+  vec3 baseCol = mix( ground, rockCol, rockMask );
   baseCol *= 0.88 + 0.24 * ( vnoise( lp * 0.021 ) * 0.6 + vnoise( lp * 0.13 ) * 0.4 );
   diffuseColor.rgb *= baseCol * mix( 1.0, dLum, mix( 0.25, 0.95, detailNear ) );`)
       .replace("#include <normal_fragment_maps>", APPLY_DETAIL_NORMAL);
