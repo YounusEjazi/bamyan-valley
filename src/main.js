@@ -11,6 +11,7 @@ import { Player } from "./player.js";
 import { Discovery } from "./discovery.js";
 import { Grass } from "./grass.js";
 import { Birds } from "./life.js";
+import { Water } from "./water.js";
 import { Pipeline } from "./post.js";
 import { TouchControls } from "./touch.js";
 import { Sound } from "./audio.js";
@@ -161,7 +162,8 @@ function showSheet(id) {
 document.querySelectorAll("[data-close]").forEach((b) => { b.onclick = () => { $(b.dataset.close).hidden = true; }; });
 
 // ------------------------------------------------------------------ start
-let world, player, discovery, grass, birds, touch;
+let world, player, discovery, grass, birds, touch, water;
+let waterNear = 0;
 
 function setPlaying(on, keepMenuHidden = false) {
   playing = on;
@@ -219,6 +221,11 @@ async function init() {
 
   grass = new Grass(scene, world, world.textures.core, world.ground.core.bounds, tier);
   birds = new Birds(scene, world, tier.birds);
+  // rivers and streams: built in the background after the world appears
+  fetch("./models/water.json").then((r) => r.json()).then((data) => {
+    water = new Water(scene, world, data);
+    return water.build();
+  }).catch((e) => console.warn("water", e));
   discovery = new Discovery(scene, world.pois, ui);
   const updateMenuCount = () => { $("menu-found").textContent = `(${discovery.count}/${world.pois.length})`; };
   discovery.onChange = updateMenuCount;
@@ -302,7 +309,7 @@ async function init() {
 
   world.trees.update(camera.position, true);
   if (import.meta.env.DEV) {
-    window.bamyan = { THREE, scene, camera, world, player, discovery, grass, birds, renderer, pipeline, setSun, atmo, tier, travel };
+    window.bamyan = { THREE, scene, camera, world, player, discovery, grass, birds, renderer, pipeline, setSun, atmo, tier, travel, get water() { return water; } };
   }
   $("hud").hidden = false;
   $("menu").hidden = false;
@@ -336,9 +343,10 @@ renderer.setAnimationLoop((now) => {
     placeShadow(player.feet);
     if (now - lastCull > 250) {
       cullByDistance(world, camera.position, tier);
+      waterNear = water ? water.proximity(camera.position) : 0;
       lastCull = now;
     }
-    sound.update(dt, altitude, player.speed(), player.mode === "fly", playing);
+    sound.update(dt, altitude, player.speed(), player.mode === "fly", playing, waterNear);
     if (playing) pipeline.adapt(dt);
   }
   pipeline.updateSun(camera, sunState.dir, sunState.el);

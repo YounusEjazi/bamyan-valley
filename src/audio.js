@@ -1,5 +1,6 @@
 // Sound, synthesised with Web Audio (no files): wind that gusts and grows with altitude and
-// flying speed, footsteps on dry ground, a thud on landing and the discovery chime.
+// flying speed, running water near the river and streams, footsteps on dry ground, a thud
+// on landing and the discovery chime.
 // Starts on the first click / tap (browsers require a gesture); M or the menu mutes it.
 const KEY = "bamyan.sound.v1";
 
@@ -66,6 +67,28 @@ export class Sound {
     hiss.connect(this.hissFilter).connect(this.hissGain).connect(this.master);
     hiss.start();
 
+    // running water: bubbling band of noise, amplitude-modulated
+    const water = ctx.createBufferSource();
+    water.buffer = noiseBuffer(ctx, 4);
+    water.loop = true;
+    const wf = ctx.createBiquadFilter();
+    wf.type = "bandpass";
+    wf.frequency.value = 1300;
+    wf.Q.value = 0.7;
+    const wlow = ctx.createBiquadFilter();
+    wlow.type = "lowpass";
+    wlow.frequency.value = 3200;
+    this.waterGain = ctx.createGain();
+    this.waterGain.gain.value = 0;
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 7.3;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 250;
+    lfo.connect(lfoGain).connect(wf.frequency);
+    lfo.start();
+    water.connect(wf).connect(wlow).connect(this.waterGain).connect(this.master);
+    water.start();
+
     this.white = noiseBuffer(ctx, 1);
   }
 
@@ -77,8 +100,8 @@ export class Sound {
     if (this.master) this.master.gain.setTargetAtTime(m ? 0 : 0.9, this.ctx.currentTime, 0.1);
   }
 
-  // altitude above ground (m), speed (m/s), is the player flying
-  update(dt, altitude, speed, flying, active) {
+  // altitude above ground (m), speed (m/s), is the player flying, nearby water 0..1
+  update(dt, altitude, speed, flying, active, water = 0) {
     if (!this.ctx) return;
     this.gustTimer -= dt;
     if (this.gustTimer <= 0) {
@@ -93,6 +116,7 @@ export class Sound {
     this.windGain.gain.setTargetAtTime(level, t, 0.3);
     this.windFilter.frequency.setTargetAtTime(260 + 380 * this.gust + 700 * rush, t, 0.4);
     this.hissGain.gain.setTargetAtTime(active ? 0.006 + 0.02 * this.gust * high + 0.05 * rush : 0, t, 0.3);
+    this.waterGain.gain.setTargetAtTime(active ? water * 0.09 : 0, t, 0.4);
   }
 
   // one footstep: a short crunch of filtered noise
