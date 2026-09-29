@@ -48,7 +48,18 @@
           <div><b>Fly</b> switch walk ⇄ fly</div>
           <div class="hint-rotate">Turn your phone sideways for the best view</div>
         </div>
+        <p class="menu-credits touch-only">
+          Terrain: Copernicus DEM GLO-30 · Contains modified Copernicus Sentinel data 2025 ·
+          Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors ·
+          Textures: <a href="https://polyhaven.com" target="_blank" rel="noopener">Poly Haven</a> (CC0)
+        </p>
       </div>
+    </div>
+
+    <!-- paused (desktop): the mouse is free; click to continue, or open the menu -->
+    <div id="paused" hidden>
+      <span>Paused · click to continue</span>
+      <button id="open-menu">Menu</button>
     </div>
 
     <!-- journal -->
@@ -107,7 +118,7 @@
       </div>
     </div>
 
-    <div id="credits">
+    <div id="credits" class="keys-only">
       Terrain: Copernicus DEM GLO-30 · Contains modified Copernicus Sentinel data 2025 ·
       Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors ·
       Textures: <a href="https://polyhaven.com" target="_blank" rel="noopener">Poly Haven</a> (CC0)

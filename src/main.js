@@ -154,31 +154,61 @@ $("toast").addEventListener("click", () => { $("toast").hidden = true; });
 
 document.body.classList.toggle("touch", isTouch);
 if (isTouch) $("play").textContent = "Tap to explore";
-let playing = false;
 
-function showSheet(id) {
-  for (const s of ["journal", "settings"]) $(s).hidden = s !== id;
-  setPlaying(false, true);
-}
-document.querySelectorAll("[data-close]").forEach((b) => { b.onclick = () => { $(b.dataset.close).hidden = true; }; });
-
-// ------------------------------------------------------------------ start
+// ------------------------------------------------------------------ game state
+// The menu card opens only when asked for (pause button, Menu, or Esc when the mouse is
+// free). Losing the pointer lock or the tab just pauses: a small "click to continue" pill
+// on desktop, nothing on phones. Closing the journal / settings goes back to where they
+// were opened from.
 let world, player, discovery, grass, birds, touch, water;
 let waterNear = 0;
+let started = false;      // the first "explore" click happened
+let playing = false;
+let menuOpen = true;      // the start card is the menu
+let sheetFrom = "game";
 
-function setPlaying(on, keepMenuHidden = false) {
+const sheetOpen = () => !$("journal").hidden || !$("settings").hidden;
+const showPaused = () => { $("paused").hidden = isTouch || playing || !started || menuOpen || sheetOpen(); };
+
+function setPlaying(on) {
   playing = on;
   if (player) player.enabled = on;
-  $("menu").hidden = on || keepMenuHidden;
   touch?.show(on);
+  document.body.classList.toggle("playing", on);
   if (on) {
+    started = true;
+    menuOpen = false;
+    $("menu").hidden = true;
     $("journal").hidden = true;
     $("settings").hidden = true;
     $("play").textContent = isTouch ? "Continue" : "Continue exploring";
   } else if (document.pointerLockElement) {
     document.exitPointerLock();
   }
+  showPaused();
 }
+
+function openMenu() {
+  menuOpen = true;
+  $("journal").hidden = true;
+  $("settings").hidden = true;
+  setPlaying(false);
+  $("menu").hidden = false;
+}
+
+function showSheet(id) {
+  sheetFrom = menuOpen ? "menu" : "game";
+  for (const s of ["journal", "settings"]) $(s).hidden = s !== id;
+  $("menu").hidden = true;
+  setPlaying(false);
+}
+
+function closeSheet(id) {
+  $(id).hidden = true;
+  if (sheetFrom === "menu" || !started) openMenu();
+  else engage();
+}
+document.querySelectorAll("[data-close]").forEach((b) => { b.onclick = () => closeSheet(b.dataset.close); });
 
 // enter the game: pointer lock on desktop, touch controls on phones
 function engage() {
@@ -208,7 +238,7 @@ async function init() {
 
   player = new Player(camera, renderer.domElement, world);
   touch = new TouchControls(player, $("touch"), {
-    onPause: () => setPlaying(false),
+    onPause: openMenu,
     onJournal: () => showSheet("journal"),
   });
   player.onModeChange = (m) => {
@@ -290,13 +320,25 @@ async function init() {
   $("play").onclick = engage;
   $("open-journal").onclick = () => showSheet("journal");
   $("open-settings").onclick = () => showSheet("settings");
+  $("open-menu").onclick = (e) => { e.stopPropagation(); openMenu(); };
+  $("paused").onclick = engage;
+  renderer.domElement.addEventListener("click", () => {
+    if (!isTouch && started && !playing && !menuOpen && !sheetOpen()) engage();
+  });
   document.addEventListener("pointerlockchange", () => {
-    if (!isTouch) setPlaying(document.pointerLockElement === renderer.domElement);
+    if (isTouch) return;
+    const locked = document.pointerLockElement === renderer.domElement;
+    if (locked !== playing) setPlaying(locked);
   });
   window.addEventListener("keydown", (e) => {
-    if (e.code === "KeyJ") {
+    if (e.code === "KeyJ" && started) {
       if ($("journal").hidden) showSheet("journal");
-      else $("journal").hidden = true;
+      else closeSheet("journal");
+    }
+    // the first Esc frees the mouse (browser), a second one opens the menu
+    if (e.code === "Escape" && started && !playing) {
+      if (sheetOpen()) closeSheet(!$("journal").hidden ? "journal" : "settings");
+      else if (!menuOpen) openMenu();
     }
     if (e.code === "KeyM") {
       sound.setMuted(!sound.muted);
@@ -304,7 +346,8 @@ async function init() {
     }
   });
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden && playing) setPlaying(false);
+    // phones: just let go of the sticks; desktop loses the pointer lock by itself (-> paused)
+    if (document.hidden) touch.reset();
     pipeline.pause(2);
   });
 

@@ -186,6 +186,19 @@ kbd {
 }
 #credits a { color: inherit; }
 
+/* paused pill (desktop) */
+#paused {
+  position: fixed; left: 50%; bottom: 56px; transform: translateX(-50%); z-index: 8;
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 8px 8px 16px; border-radius: 999px;
+  background: var(--bg); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  font-size: 14px; cursor: pointer; animation: toast-in 0.3s ease-out;
+}
+#paused[hidden] { display: none; }
+#paused button { border-radius: 999px; }
+.menu-credits { margin: 14px 0 0; font-size: 10px; line-height: 1.4; color: var(--muted); }
+.menu-credits a { color: inherit; }
+
 /* touch controls */
 #touch[hidden] { display: none; }
 #touch .touch-zone { position: fixed; inset: 0; z-index: 3; touch-action: none; }
