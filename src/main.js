@@ -107,6 +107,7 @@ function setSun(az, el) {
   if (envTarget) envTarget.dispose();
   envTarget = pmrem.fromScene(envScene);
   scene.environment = envTarget.texture;
+  water?.setEnvironment(envTarget.texture);
   placeShadow(shadowCenter, true);
   $("sun-az").value = az;
   $("sun-el").value = el;
@@ -223,7 +224,7 @@ async function init() {
   birds = new Birds(scene, world, tier.birds);
   // rivers and streams: built in the background after the world appears
   fetch("./models/water.json").then((r) => r.json()).then((data) => {
-    water = new Water(scene, world, data);
+    water = new Water(scene, world, data, envTarget.texture);
     return water.build();
   }).catch((e) => console.warn("water", e));
   discovery = new Discovery(scene, world.pois, ui);

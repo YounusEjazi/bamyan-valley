@@ -33,9 +33,9 @@ varying vec3 vWPos;
 ${NOISE_GLSL}
 // ripple height field in (across, along) metres; flows downstream
 float ripples( vec2 q, float t ) {
-  return vnoise( vec2( q.x * 0.9, q.y * 0.35 - t * 1.6 ) ) * 0.6
-       + vnoise( vec2( q.x * 2.3 + 5.0, q.y * 1.1 - t * 2.4 ) ) * 0.3
-       + vnoise( vec2( q.x * 5.1 + 1.0, q.y * 3.3 - t * 3.1 ) ) * 0.1;
+  return vnoise( vec2( q.x * 2.1, q.y * 0.8 - t * 1.9 ) ) * 0.5
+       + vnoise( vec2( q.x * 4.7 + 5.0, q.y * 2.3 - t * 2.7 ) ) * 0.3
+       + vnoise( vec2( q.x * 10.3 + 1.0, q.y * 6.1 - t * 3.6 ) ) * 0.2;
 }`)
       .replace("#include <color_fragment>", `#include <color_fragment>
         float across = vFlow.x, width = vFlow.z;
@@ -46,7 +46,7 @@ float ripples( vec2 q, float t ) {
         float depth = smoothstep( 0.0, width * 0.35, bank );
         diffuseColor.rgb = mix( vec3( 0.11, 0.1, 0.075 ), vec3( 0.03, 0.05, 0.045 ), depth );
         // foam and riffles along the banks
-        float foam = smoothstep( 0.62, 0.8, h ) * ( 1.0 - smoothstep( 0.3, 2.2, bank ) );
+        float foam = smoothstep( 0.6, 0.78, h ) * ( 1.0 - smoothstep( 0.2, 1.6, bank ) );
         diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.55, 0.56, 0.52 ), foam * 0.7 );
         diffuseColor.a = smoothstep( 0.0, 0.9, bank ) * mix( 0.78, 0.94, depth );
         float waterFoam = foam;`)
@@ -54,10 +54,10 @@ float ripples( vec2 q, float t ) {
         roughnessFactor = mix( 0.06, 0.5, waterFoam );`)
       .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
         {
-          float e = 0.25;
+          float e = 0.08;
           float hx = ripples( q + vec2( e, 0.0 ), uTime ) - ripples( q - vec2( e, 0.0 ), uTime );
           float hy = ripples( q + vec2( 0.0, e ), uTime ) - ripples( q - vec2( 0.0, e ), uTime );
-          float amp = 0.55 * ( 1.0 - smoothstep( 80.0, 900.0, distance( vWPos, cameraPosition ) ) );
+          float amp = 0.2 * ( 1.0 - smoothstep( 60.0, 700.0, distance( vWPos, cameraPosition ) ) );
           vec2 acrossDir = vec2( - vDir.y, vDir.x );
           vec2 g = ( acrossDir * hx + vDir * hy ) * amp / ( 2.0 * e );
           vec3 nW = normalize( vec3( - g.x, 1.0, - g.y ) );
@@ -67,14 +67,22 @@ float ripples( vec2 q, float t ) {
 }
 
 export class Water {
-  constructor(scene, world, data) {
+  constructor(scene, world, data, env) {
     this.scene = scene;
     this.world = world;
     this.lines = data.lines;
     this.material = waterMaterial();
+    this.setEnvironment(env);
     this.grid = new Map();
     this.ready = false;
     this._p = new THREE.Vector3();
+  }
+
+  // the water mirrors the sky much more strongly than the scene's diffuse sky light
+  setEnvironment(tex) {
+    this.material.envMap = tex;
+    this.material.envMapIntensity = 0.16;
+    this.material.needsUpdate = true;
   }
 
   // build a few lines per call so loading stays smooth
@@ -124,7 +132,7 @@ export class Water {
     const m = pos.length / 6;
     for (let i = 0; i < m - 1; i++) {
       const a = i * 2;
-      idx.push(a, a + 1, a + 3, a, a + 3, a + 2);
+      idx.push(a, a + 3, a + 1, a, a + 2, a + 3);   // counter-clockwise seen from above
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
