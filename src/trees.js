@@ -30,7 +30,7 @@ function poplarRadius(y) {
   return 0;
 }
 const ROUND = [null, { cy: 0.62, rx: 0.46, ry: 0.33 }, { cy: 0.62, rx: 0.4, ry: 0.32 }];
-const CARDS = [{ n: 92, size: 0.085 }, { n: 84, size: 0.22 }, { n: 70, size: 0.2 }];
+const CARDS = [{ n: 120, size: 0.075 }, { n: 90, size: 0.22 }, { n: 76, size: 0.2 }];
 const CROWN = [[0.06, 0.13, 0.034], [0.1, 0.15, 0.05], [0.085, 0.14, 0.042]].map((c) => new THREE.Color(...c));
 const TRUNK = new THREE.Color(0.1, 0.075, 0.055);
 
@@ -296,14 +296,14 @@ ${SWAY_GLSL}`)
           // near trees get leaf cards: the solid crown shrinks into a dark core inside them
           if ( aCrown > 0.0 && distance( instanceMatrix[3].xyz, uNearCenter ) < uNearR ) {
             vec3 cc = vec3( 0.0, aCrown, 0.0 );
-            transformed = cc + ( transformed - cc ) * vec3( 0.74, 0.88, 0.74 );
+            transformed = cc + ( transformed - cc ) * vec3( 0.64, 0.84, 0.64 );
             vCore = 1.0;
           }
         #endif`)
       .replace("#include <project_vertex>", swayProject());
     shader.fragmentShader = shader.fragmentShader
       .replace("#include <common>", "#include <common>\nvarying float vCore;")
-      .replace("#include <color_fragment>", "#include <color_fragment>\n  diffuseColor.rgb *= 1.0 - 0.3 * vCore;");
+      .replace("#include <color_fragment>", "#include <color_fragment>\n  diffuseColor.rgb *= 1.0 - 0.42 * vCore;");
   });
 }
 
