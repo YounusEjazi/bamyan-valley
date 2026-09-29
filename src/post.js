@@ -1,7 +1,7 @@
 // Render pipeline: the scene goes into an HDR target (MSAA per tier, float depth so the
 // reversed depth buffer keeps kilometres of terrain free of z-fighting without a
 // logarithmic depth buffer), then one full-screen pass does light shafts from the sun,
-// glare, tone mapping (AgX) and a filmic grade: saturation, S-curve, vignette, grain.
+// glare, white balance, tone mapping (Khronos PBR Neutral) and a filmic grade: saturation, S-curve, vignette, grain.
 // The internal resolution adapts to the frame rate.
 import * as THREE from "three";
 
@@ -16,6 +16,7 @@ uniform vec2 uSunUV;
 uniform float uSunVis, uRays;
 uniform vec3 uSunTint;
 uniform float uExposure, uSaturation, uContrast, uVignette, uGrain;
+uniform vec3 uWhite;
 varying vec2 vUv;
 
 float hash( vec2 p ) { return fract( sin( dot( p, vec2( 12.9898, 78.233 ) ) ) * 43758.5453 ); }
@@ -45,7 +46,7 @@ void main() {
       + isSky( uSunUV + vec2( 0.0, 0.02 ) ) + isSky( uSunUV - vec2( 0.0, 0.02 ) ) );
     col += uSunTint * open * uSunVis * ( exp( - sunDist * 9.0 ) * 0.6 + exp( - sunDist * 2.5 ) * 0.12 );
   }
-  col *= uExposure;
+  col *= uExposure * uWhite;
   float l = dot( col, vec3( 0.2126, 0.7152, 0.0722 ) );
   col = max( mix( vec3( l ), col, uSaturation ), 0.0 );
   gl_FragColor = vec4( col, 1.0 );
@@ -83,7 +84,8 @@ export class Pipeline {
       uRays: { value: 0.55 },
       uSunTint: { value: new THREE.Color(1, 0.85, 0.65) },
       uExposure: { value: 1.0 },
-      uSaturation: { value: 1.12 },
+      uWhite: { value: new THREE.Vector3(1.05, 1.0, 0.92) },   // warm white balance
+      uSaturation: { value: 1.1 },
       uContrast: { value: 0.22 },
       uVignette: { value: 0.35 },
       uGrain: { value: 0.022 },

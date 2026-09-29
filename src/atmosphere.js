@@ -11,6 +11,7 @@ export const atmo = {
   uSunColor: { value: new THREE.Color(1, 0.9, 0.8) },
   uFogBase: { value: 2500 },            // valley floor elevation (m): haze is densest below
   uFogFalloff: { value: 1 / 1300 },     // 1 / scale height of the haze (m)
+  uFogSky: { value: 0.18 },             // sky radiance -> haze colour (the Sky shader is very bright)
   uCloudCover: { value: 0.4 },
   uCloudShadow: { value: 0.62 },        // sunlight removed under a cloud
   uCloudDrift: { value: new THREE.Vector2(7, -3) },  // m/s
@@ -19,7 +20,7 @@ export const atmo = {
 };
 
 const ATMO_PARS = /* glsl */ `
-uniform float uTime, uFogBase, uFogFalloff, uCloudCover, uCloudShadow, uWind;
+uniform float uTime, uFogBase, uFogFalloff, uFogSky, uCloudCover, uCloudShadow, uWind;
 uniform vec3 uSunDir, uSunColor;
 uniform vec2 uCloudDrift, uWindDir;
 float atmoHash( vec2 p ) {
@@ -92,7 +93,7 @@ THREE.ShaderChunk.fog_fragment = /* glsl */ `
   vec3 fogSky = fogColor;
   #if defined( USE_ENVMAP ) && defined( ENVMAP_TYPE_CUBE_UV )
     vec3 fogLook = normalize( vec3( fogDir.x, max( fogDir.y, 0.0 ) * 0.4 + 0.04, fogDir.z ) );
-    fogSky = textureCubeUV( envMap, envMapRotation * fogLook, 0.6 ).rgb;
+    fogSky = textureCubeUV( envMap, envMapRotation * fogLook, 0.6 ).rgb * uFogSky;
   #endif
   float fogSun = pow( max( dot( fogDir, uSunDir ), 0.0 ), 8.0 );
   gl_FragColor.rgb = mix( gl_FragColor.rgb, fogSky + uSunColor * fogSun * 0.35, fogFactor );

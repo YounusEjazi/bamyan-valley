@@ -16,7 +16,7 @@ import { TouchControls } from "./touch.js";
 import { Sound } from "./audio.js";
 
 const SUN_INTENSITY = 3.4;
-const ENV_INTENSITY = 0.09;       // the Sky shader is very bright; more washes the colours out
+const ENV_INTENSITY = 0.075;      // the Sky shader is very bright; more washes the colours out
 const FOG_DENSITY = 3.2e-5;       // haze extinction per metre at the valley floor
 const CLOUDS = { coverage: 0.38, density: 0.45, scale: 0.00022, speed: 0.00012 };
 
@@ -27,7 +27,7 @@ const renderer = new THREE.WebGLRenderer({
   powerPreference: "high-performance",
 });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, tier.maxDpr));
-renderer.toneMapping = THREE.AgXToneMapping;
+renderer.toneMapping = THREE.NeutralToneMapping;   // keeps the satellite / photo colours
 renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -76,7 +76,7 @@ sun.shadow.normalBias = 0.35 * (SH / 380) * (4096 / tier.shadowMap);
 sun.shadow.radius = 2;
 scene.add(sun, sun.target);
 // light bounced off the sunlit desert fills the shadows with a warm tone
-const bounce = new THREE.HemisphereLight(0x9fb8d6, 0x8a6a4c, 0.35);
+const bounce = new THREE.HemisphereLight(0xc4ccd2, 0x9c7b58, 0.3);
 scene.add(bounce);
 
 // ------------------------------------------------------------------ helpers
@@ -101,7 +101,7 @@ function setSun(az, el) {
   sun.intensity = SUN_INTENSITY * (0.45 + 0.55 * low);
   atmo.uSunDir.value.copy(sunState.dir);
   atmo.uSunColor.value.copy(sun.color).multiplyScalar(sun.intensity * 0.45);
-  bounce.intensity = 0.12 + 0.28 * low;
+  bounce.intensity = 0.1 + 0.22 * low;
   pipeline.uniforms.uSunTint.value.setRGB(1.0, 0.72 + 0.16 * low, 0.48 + 0.25 * low).multiplyScalar(0.5 + 0.5 * low);
   if (envTarget) envTarget.dispose();
   envTarget = pmrem.fromScene(envScene);

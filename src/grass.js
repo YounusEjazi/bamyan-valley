@@ -7,15 +7,17 @@ import { withAtmosphere } from "./atmosphere.js";
 
 const CHUNK = 32;
 const MAX_PER_CHUNK = 1500;
+const FRESH = new THREE.Color(0.085, 0.16, 0.032);   // summer crops / meadow (linear)
 
 function tuftGeometry() {
-  // six curved, tapering blades per tuft (unit height), base at y = 0
+  // seven curved, tapering blades per tuft (unit height), base at y = 0
   const pos = [], col = [], idx = [];
-  const blades = 6;
+  const blades = 7;
   for (let i = 0; i < blades; i++) {
     const a = (i / blades) * Math.PI * 2 + 0.4 * Math.sin(i * 7.1);
-    const ox = Math.cos(a) * 0.05, oz = Math.sin(a) * 0.05;          // blades spread around the tuft
-    const w = 0.022 + 0.01 * ((i * 37) % 5) / 5;                      // half blade width at the base
+    const spread = 0.05 + 0.06 * ((i * 17) % 4) / 4;
+    const ox = Math.cos(a) * spread, oz = Math.sin(a) * spread;      // blades spread around the tuft
+    const w = 0.026 + 0.014 * ((i * 37) % 5) / 5;                     // half blade width at the base
     const dx = -Math.sin(a) * w, dz = Math.cos(a) * w;
     const lean = 0.35 + 0.25 * ((i * 13) % 3) / 3;
     const h = 0.75 + 0.25 * ((i * 29) % 4) / 4;
@@ -120,10 +122,9 @@ export class Grass {
       const wdt = 0.8 + rnd() * 0.7;
       m.compose(p.set(x, y - 0.04, z), q, s.set(wdt, hgt, wdt));
       mesh.setMatrixAt(k, m);
-      // the ground colour, lifted and pushed a little greener, with some variation
-      tint.copy(this.tint).multiplyScalar(1.9 + rnd() * 0.9);
-      tint.g *= 1.08;
-      tint.r *= 0.9 + rnd() * 0.25;
+      // the ground colour, lifted and pulled toward fresh green, with some variation
+      tint.copy(this.tint).multiplyScalar(1.6).lerp(FRESH, 0.35 + 0.4 * g).multiplyScalar(0.85 + rnd() * 0.5);
+      tint.r *= 0.9 + rnd() * 0.3;
       mesh.setColorAt(k, tint);
       k++;
     }

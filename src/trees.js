@@ -2,7 +2,8 @@
 // Far away they are solid low-poly crowns instanced in 500 m tiles; these also cast the
 // (static) sun shadows. Within tier.treeNear of the player the same trees get crowns of
 // alpha-tested leaf cards that sway with the wind, flutter and catch the light; the far
-// tiles collapse those crowns in their vertex shader and keep drawing the trunks.
+// tiles shrink and darken those crowns in their vertex shader into a solid core that the
+// cards wrap around (dense foliage without see-through gaps), and keep drawing the trunks.
 import * as THREE from "three";
 import { withAtmosphere } from "./atmosphere.js";
 
@@ -29,7 +30,7 @@ function poplarRadius(y) {
   return 0;
 }
 const ROUND = [null, { cy: 0.62, rx: 0.46, ry: 0.33 }, { cy: 0.62, rx: 0.4, ry: 0.32 }];
-const CARDS = [{ n: 72, size: 0.072 }, { n: 66, size: 0.2 }, { n: 54, size: 0.18 }];
+const CARDS = [{ n: 92, size: 0.085 }, { n: 84, size: 0.22 }, { n: 70, size: 0.2 }];
 const CROWN = [[0.045, 0.1, 0.028], [0.085, 0.13, 0.045], [0.07, 0.115, 0.035]].map((c) => new THREE.Color(...c));
 const TRUNK = new THREE.Color(0.1, 0.075, 0.055);
 
@@ -37,40 +38,62 @@ const TRUNK = new THREE.Color(0.1, 0.075, 0.055);
 // A cluster of leaves and twigs on a transparent canvas. Mip levels are made here with the
 // alpha boosted, so alpha-tested crowns don't thin out with distance.
 function leafTexture() {
-  const S = 256;
+  const S = 512;
   const c = document.createElement("canvas");
   c.width = c.height = S;
-  const g = c.getContext("2d");
+  const g = c.getContext("2d", { willReadFrequently: true });
   const rnd = mulberry32(11);
   g.lineCap = "round";
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 9; i++) {
     const a = rnd() * Math.PI * 2;
-    g.strokeStyle = "rgb(74,62,48)";
-    g.lineWidth = 1.2 + rnd() * 1.5;
+    g.strokeStyle = "rgb(62,50,38)";
+    g.lineWidth = 2 + rnd() * 3;
     g.beginPath();
-    g.moveTo(S / 2 + (rnd() - 0.5) * 30, S / 2 + (rnd() - 0.5) * 30);
-    g.lineTo(S / 2 + Math.cos(a) * S * 0.42, S / 2 + Math.sin(a) * S * 0.42);
+    g.moveTo(S / 2 + (rnd() - 0.5) * 60, S / 2 + (rnd() - 0.5) * 60);
+    g.quadraticCurveTo(S / 2 + Math.cos(a + 0.4) * S * 0.2, S / 2 + Math.sin(a + 0.4) * S * 0.2,
+      S / 2 + Math.cos(a) * S * 0.44, S / 2 + Math.sin(a) * S * 0.44);
     g.stroke();
   }
-  for (let i = 0; i < 340; i++) {
-    const a = rnd() * Math.PI * 2, r = Math.pow(rnd(), 0.65) * S * 0.44;
-    const len = 9 + rnd() * 11, wid = len * (0.5 + rnd() * 0.25);
-    const l = 0.5 + rnd() * 0.5, hue = rnd();
+  // pointed leaves, darker and more crowded toward the middle of the cluster
+  for (let i = 0; i < 520; i++) {
+    const a = rnd() * Math.PI * 2, rr = Math.pow(rnd(), 0.6);
+    const r = rr * S * 0.45;
+    const len = 26 + rnd() * 20, wid = len * (0.42 + rnd() * 0.2);
+    const hue = 78 + rnd() * 30, sat = 38 + rnd() * 28, light = 16 + rnd() * 16 + rr * 12;
     g.save();
     g.translate(S / 2 + Math.cos(a) * r, S / 2 + Math.sin(a) * r);
-    g.rotate(rnd() * Math.PI * 2);
-    g.fillStyle = `rgb(${Math.round((165 + 50 * hue) * l)},${Math.round(215 * l)},${Math.round((125 - 40 * hue) * l)})`;
+    g.rotate(a + Math.PI / 2 + (rnd() - 0.5) * 1.8);
+    const grad = g.createLinearGradient(-wid / 2, 0, wid / 2, 0);
+    grad.addColorStop(0, `hsl(${hue},${sat}%,${light * 0.8}%)`);
+    grad.addColorStop(1, `hsl(${hue - 6},${sat + 6}%,${light * 1.25}%)`);
+    g.fillStyle = grad;
     g.beginPath();
-    g.ellipse(0, 0, wid / 2, len / 2, 0, 0, Math.PI * 2);
+    g.moveTo(0, len / 2);
+    g.quadraticCurveTo(wid * 0.75, 0, 0, -len / 2);
+    g.quadraticCurveTo(-wid * 0.75, 0, 0, len / 2);
     g.fill();
-    g.strokeStyle = "rgba(255,255,225,0.22)";
-    g.lineWidth = 1;
+    g.strokeStyle = `hsla(${hue},30%,${light * 1.6}%,0.5)`;
+    g.lineWidth = 1.2;
     g.beginPath();
-    g.moveTo(0, -len / 2);
-    g.lineTo(0, len / 2);
+    g.moveTo(0, len / 2);
+    g.lineTo(0, -len / 2);
     g.stroke();
     g.restore();
   }
+  // mean colour (linear) of the leaves, to match the solid far crowns
+  const px = g.getImageData(0, 0, S, S).data;
+  const mean = new THREE.Color(0, 0, 0);
+  const tmp = new THREE.Color();
+  let n = 0;
+  for (let i = 0; i < px.length; i += 16) {
+    if (px[i + 3] < 128) continue;
+    tmp.setRGB(px[i] / 255, px[i + 1] / 255, px[i + 2] / 255, THREE.SRGBColorSpace);
+    mean.r += tmp.r;
+    mean.g += tmp.g;
+    mean.b += tmp.b;
+    n++;
+  }
+  mean.multiplyScalar(1 / Math.max(n, 1));
   const mips = [c];
   for (let s = S / 2, level = 1; s >= 1; s /= 2, level++) {
     const m = document.createElement("canvas");
@@ -78,7 +101,7 @@ function leafTexture() {
     const mg = m.getContext("2d", { willReadFrequently: true });
     mg.drawImage(mips[level - 1], 0, 0, s, s);
     const d = mg.getImageData(0, 0, s, s);
-    const boost = 1 + 0.45 * level;
+    const boost = 1 + 0.4 * level;
     for (let i = 3; i < d.data.length; i += 4) d.data[i] = Math.min(255, d.data[i] * boost);
     mg.putImageData(d, 0, 0);
     mips.push(m);
@@ -88,7 +111,8 @@ function leafTexture() {
   tex.generateMipmaps = false;
   tex.minFilter = THREE.LinearMipmapLinearFilter;
   tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
+  tex.anisotropy = 4;
+  return { tex, mean };
 }
 
 // ------------------------------------------------------------------ geometry helpers
@@ -169,7 +193,7 @@ function trunkGeometry(type) {
     : new THREE.CylinderGeometry(0.028, 0.045, 0.5, 6).translate(0, 0.25, 0);
 }
 
-// solid crown + trunk; aCrown = 1 on crown vertices
+// solid crown + trunk; aCrown = height of the crown centre on crown vertices, 0 on the trunk
 function farGeometry(type) {
   const b = new Builder();
   b.add(trunkGeometry(type), () => TRUNK, 0);
@@ -181,17 +205,18 @@ function farGeometry(type) {
     crown = new THREE.IcosahedronGeometry(1, 1).scale(r.rx, r.ry, r.rx).translate(0, r.cy, 0);
   }
   const col = CROWN[type];
-  b.add(crown, (p) => col.clone().multiplyScalar(0.55 + 0.6 * crownShade(type, p)), 1,
+  b.add(crown, (p) => col.clone().multiplyScalar(0.55 + 0.6 * crownShade(type, p)), type === 0 ? 0.55 : ROUND[type].cy,
     (p, n) => n.copy(volumeNormal(type, p)));
   return b.build("aCrown");
 }
 
 // leaf cards; aLeaf = random phase per card (flutter / shimmer)
-function nearGeometry(type) {
+function nearGeometry(type, leafMean) {
   const b = new Builder();
   const rnd = mulberry32(100 + type);
   const { n, size } = CARDS[type];
-  const col = CROWN[type].clone().multiplyScalar(2.4);   // the leaf texture averages ~0.4
+  // vertex colour x leaf texture averages to the solid far crown's colour
+  const col = new THREE.Color(CROWN[type].r / leafMean.r, CROWN[type].g / leafMean.g, CROWN[type].b / leafMean.b).multiplyScalar(1.15);
   const up = new THREE.Vector3(0, 1, 0), side = new THREE.Vector3(1, 0, 0);
   const rand = new THREE.Vector3(), t = new THREE.Vector3(), bt = new THREE.Vector3();
   for (let i = 0; i < n; i++) {
@@ -263,13 +288,22 @@ function farMaterial(near) {
 attribute float aCrown;
 uniform vec3 uNearCenter;
 uniform float uNearR;
+varying float vCore;
 ${SWAY_GLSL}`)
       .replace("#include <begin_vertex>", `#include <begin_vertex>
+        vCore = 0.0;
         #ifdef USE_INSTANCING
-          // near trees are drawn with leaf cards: collapse the solid crown
-          if ( aCrown > 0.5 && distance( instanceMatrix[3].xyz, uNearCenter ) < uNearR ) transformed = vec3( 0.0 );
+          // near trees get leaf cards: the solid crown shrinks into a dark core inside them
+          if ( aCrown > 0.0 && distance( instanceMatrix[3].xyz, uNearCenter ) < uNearR ) {
+            vec3 cc = vec3( 0.0, aCrown, 0.0 );
+            transformed = cc + ( transformed - cc ) * vec3( 0.74, 0.88, 0.74 );
+            vCore = 1.0;
+          }
         #endif`)
       .replace("#include <project_vertex>", swayProject());
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", "#include <common>\nvarying float vCore;")
+      .replace("#include <color_fragment>", "#include <color_fragment>\n  diffuseColor.rgb *= 1.0 - 0.45 * vCore;");
   });
 }
 
@@ -373,9 +407,10 @@ export class Trees {
     }
 
     // near leaf-card meshes, one per type, refilled as the player moves
-    const leafMat = leafMaterial(leafTexture(), tier.msaa);
+    const leaf = leafTexture();
+    const leafMat = leafMaterial(leaf.tex, tier.msaa);
     this.nearMeshes = [0, 1, 2].map((type) => {
-      const mesh = new THREE.InstancedMesh(nearGeometry(type), leafMat, 1500);
+      const mesh = new THREE.InstancedMesh(nearGeometry(type, leaf.mean), leafMat, 1500);
       mesh.count = 0;
       mesh.frustumCulled = false;
       mesh.receiveShadow = true;

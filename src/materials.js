@@ -142,9 +142,11 @@ vec2 boundsUV( vec2 p, vec4 b ) { return ( p - b.xy ) / ( b.zw - b.xy ); }`)
     detailN = g.n;
   }
   if ( rockW > 0.01 ) {
-    Detail r = triplanar( uRock, vWorldPos, nGeo, 0.17, uMeans.x, 1.35 );
+    // strata wander up and down instead of repeating in straight bands
+    vec3 rp = vWorldPos + vec3( 0.0, ( vnoise( vWorldPos.xz * 0.045 ) - 0.5 ) * 9.0 + ( vnoise( vWorldPos.xz * 0.19 + 3.1 ) - 0.5 ) * 2.5, 0.0 );
+    Detail r = triplanar( uRock, rp, nGeo, 0.14, uMeans.x, 1.35 );
     // a second, coarser layer breaks up the tiling
-    float macro = texture2D( uRock, vec2( vWorldPos.x + vWorldPos.z, vWorldPos.y ) * 0.023 ).r / uMeans.x;
+    float macro = texture2D( uRock, vec2( rp.x + rp.z, rp.y ) * 0.021 ).r / uMeans.x;
     dLum = mix( dLum, r.lum * mix( 1.0, macro, 0.45 ), rockW );
     detailN = normalize( mix( detailN, r.n, rockW ) );
   }
