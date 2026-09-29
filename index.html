@@ -2,7 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#2a211b" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="description" content="Explore the Bamyan valley and the cliff of the two Buddhas in 3D, built from real terrain, satellite and map data." />
     <title>Bamyan Valley</title>
     <link rel="stylesheet" href="./src/style.css" />
   </head>
@@ -25,9 +30,9 @@
         <button id="play" class="primary">Click to explore</button>
         <div class="menu-row">
           <button id="open-journal">Journal <span id="menu-found"></span></button>
-          <button id="open-settings">Viewpoints &amp; sun</button>
+          <button id="open-settings">Views &amp; settings</button>
         </div>
-        <div class="controls">
+        <div class="controls keys-only">
           <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move</div>
           <div><kbd>Mouse</kbd> look</div>
           <div><kbd>Shift</kbd> run / fly fast</div>
@@ -35,7 +40,13 @@
           <div><kbd>F</kbd> walk ⇄ fly</div>
           <div><kbd>C</kbd> fly down</div>
           <div><kbd>J</kbd> journal</div>
-          <div><kbd>Esc</kbd> menu</div>
+          <div><kbd>M</kbd> sound · <kbd>Esc</kbd> menu</div>
+        </div>
+        <div class="controls touch-only">
+          <div><b>Left thumb</b> move · push to the edge to run</div>
+          <div><b>Right thumb</b> drag to look</div>
+          <div><b>Fly</b> switch walk ⇄ fly</div>
+          <div class="hint-rotate">Turn your phone sideways for the best view</div>
         </div>
       </div>
     </div>
@@ -44,15 +55,15 @@
     <div id="journal" class="sheet" hidden>
       <div class="sheet-head">
         <h2>Journal</h2><span id="journal-progress"></span>
-        <button class="close" data-close="journal">✕</button>
+        <button class="close" data-close="journal" aria-label="Close">✕</button>
       </div>
       <ul id="journal-list"></ul>
       <div class="sheet-foot"><button id="reset-progress">Reset progress</button></div>
     </div>
 
-    <!-- viewpoints & sun -->
+    <!-- viewpoints, sun, graphics -->
     <div id="settings" class="sheet" hidden>
-      <div class="sheet-head"><h2>Viewpoints &amp; sun</h2><button class="close" data-close="settings">✕</button></div>
+      <div class="sheet-head"><h2>Views &amp; settings</h2><button class="close" data-close="settings" aria-label="Close">✕</button></div>
       <h3>Viewpoints</h3>
       <div id="views" class="buttons"></div>
       <h3>Sun</h3>
@@ -62,6 +73,12 @@
       </div>
       <label>Azimuth <span id="az-val"></span><input id="sun-az" type="range" min="60" max="300" step="1" /></label>
       <label>Elevation <span id="el-val"></span><input id="sun-el" type="range" min="2" max="80" step="1" /></label>
+      <h3>Graphics &amp; sound</h3>
+      <div class="buttons">
+        <label class="select">Quality <select id="quality"></select></label>
+        <button id="sound">Sound: on</button>
+        <button id="fullscreen">Fullscreen</button>
+      </div>
     </div>
 
     <!-- HUD -->
@@ -69,15 +86,31 @@
       <div id="compass"><div id="compass-strip"></div><div class="needle"></div></div>
       <div id="status">
         <div><span class="label">Discovered</span> <b id="found-count">0 / 0</b></div>
-        <div><span class="label">Mode</span> <b id="mode">Walk</b> <span class="muted">(F)</span></div>
+        <div><span class="label">Mode</span> <b id="mode">Walk</b> <span class="muted keys-only">(F)</span></div>
       </div>
       <div id="crosshair"></div>
       <div id="toast" hidden></div>
     </div>
 
+    <!-- touch controls -->
+    <div id="touch" hidden>
+      <div class="touch-zone"></div>
+      <div class="stick"><div class="stick-knob"></div></div>
+      <div class="touch-top">
+        <button class="t-journal">Journal</button>
+        <button class="t-pause" aria-label="Menu">❚❚</button>
+      </div>
+      <div class="touch-buttons">
+        <button class="t-fly">Fly</button>
+        <button class="t-down" aria-label="Fly down">▼</button>
+        <button class="t-up">Jump</button>
+      </div>
+    </div>
+
     <div id="credits">
       Terrain: Copernicus DEM GLO-30 · Contains modified Copernicus Sentinel data 2025 ·
-      Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors
+      Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors ·
+      Textures: <a href="https://polyhaven.com" target="_blank" rel="noopener">Poly Haven</a> (CC0)
     </div>
   </body>
   <script type="module" src="./src/main.js"></script>
