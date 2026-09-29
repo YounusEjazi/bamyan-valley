@@ -1,11 +1,12 @@
 // Touch controls: a floating joystick on the left half of the screen (push it to the rim
-// to run), drag anywhere on the right half to look, buttons for jump / fly up, fly down,
-// walk-fly toggle, journal and pause. Pointer events, so several fingers work at once.
+// to run or gallop), drag anywhere on the right half to look, buttons for jump / fly up,
+// fly down, walk-fly toggle, ride / get off (next to a saddled horse), first / third
+// person, journal and pause. Pointer events, so several fingers work at once.
 const LOOK_SPEED = 2.4;      // relative to mouse sensitivity, per CSS pixel
 const STICK_RADIUS = 56;     // px
 
 export class TouchControls {
-  constructor(player, el, { onPause, onJournal }) {
+  constructor(player, el, { onPause, onJournal, onRide }) {
     this.player = player;
     this.el = el;
     this.stick = el.querySelector(".stick");
@@ -36,6 +37,8 @@ export class TouchControls {
     hold(".t-down", "down");
     const tap = (id, fn) => el.querySelector(id).addEventListener("click", (e) => { e.preventDefault(); fn(); });
     tap(".t-fly", () => player.toggleMode());
+    tap(".t-ride", onRide);
+    tap(".t-view", () => player.toggleView());
     tap(".t-journal", onJournal);
     tap(".t-pause", onPause);
   }
@@ -44,6 +47,17 @@ export class TouchControls {
     this.el.classList.toggle("flying", mode === "fly");
     this.el.querySelector(".t-up").textContent = mode === "fly" ? "▲" : "Jump";
     this.el.querySelector(".t-fly").textContent = mode === "fly" ? "Walk" : "Fly";
+  }
+
+  setView(view) {
+    this.el.querySelector(".t-view").textContent = view === "third" ? "1st" : "3rd";
+  }
+
+  // the Ride / Get off button, or null to hide it
+  setRide(label) {
+    const b = this.el.querySelector(".t-ride");
+    b.hidden = !label;
+    if (label) b.textContent = label;
   }
 
   show(on) {

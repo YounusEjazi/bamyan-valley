@@ -160,6 +160,16 @@ kbd {
 #status .label, .muted { color: var(--muted); }
 
 #crosshair { position: fixed; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: rgba(255, 255, 255, 0.7); z-index: 5; }
+body.third #crosshair { display: none; }
+
+/* "E  Ride the horse" */
+#prompt {
+  position: fixed; left: 50%; top: calc(50% + 48px); transform: translateX(-50%); z-index: 5;
+  padding: 6px 12px; border-radius: 8px; background: rgba(20, 15, 12, 0.6);
+  font-size: 14px; white-space: nowrap; pointer-events: none;
+}
+#prompt[hidden], body.touch #prompt { display: none; }
+#prompt kbd { margin-right: 4px; }
 
 #toast {
   position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%); z-index: 6;
@@ -226,6 +236,8 @@ kbd {
 }
 #touch .touch-buttons .t-up { width: 76px; height: 76px; }
 #touch .touch-buttons .t-down { display: none; }
+#touch .touch-buttons .t-ride { background: rgba(227, 154, 98, 0.55); }
+#touch .touch-buttons .t-ride[hidden] { display: none; }
 #touch.flying .touch-buttons .t-down { display: block; }
 #touch .touch-top {
   position: fixed; z-index: 5; display: flex; gap: 8px;

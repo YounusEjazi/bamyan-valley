@@ -1,5 +1,6 @@
 // Graphics tiers and device detection. Phones and tablets start on "medium", desktops on
-// "high"; ?q=low|medium|high or the menu (saved in localStorage) override it. On top of the
+// "high"; ?q=low|medium|high or the menu (saved in localStorage) override it. crowd scales
+// the number of people and animals, crowdFar is how far away they are drawn. On top of the
 // tier, the render pipeline scales its resolution at runtime to hold the frame rate.
 const KEY = "bamyan.quality.v1";
 const params = new URLSearchParams(location.search);
@@ -11,6 +12,7 @@ export const TIERS = {
     treeNear: 150, treeFar: 1800, buildingFar: 3500,
     grassRadius: 38, grassDensity: 0.35,
     detailNormals: false, rays: 0, birds: 10,
+    crowd: 0.45, crowdFar: 220,
   },
   medium: {
     label: "Medium", maxDpr: 1.5, scale: 1, minScale: 0.55, msaa: 4,
@@ -18,6 +20,7 @@ export const TIERS = {
     treeNear: 260, treeFar: 2800, buildingFar: 5500,
     grassRadius: 65, grassDensity: 0.6,
     detailNormals: true, rays: 12, birds: 22,
+    crowd: 0.7, crowdFar: 320,
   },
   high: {
     label: "High", maxDpr: 1.75, scale: 1, minScale: 0.6, msaa: 4,
@@ -25,6 +28,7 @@ export const TIERS = {
     treeNear: 420, treeFar: 3500, buildingFar: 7000,
     grassRadius: 105, grassDensity: 1,
     detailNormals: true, rays: 20, birds: 34,
+    crowd: 1, crowdFar: 450,
   },
 };
 

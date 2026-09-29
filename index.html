@@ -27,7 +27,7 @@
       <div class="card">
         <h1>Bamyan Valley</h1>
         <p class="lead">Explore the valley of the Buddhas: walk the fields and the town below the
-          cliff, climb to the niches and find all <span id="menu-total">14</span> places.</p>
+          cliff, ride a horse, climb to the niches and find all <span id="menu-total">14</span> places.</p>
         <button id="play" class="primary">Click to explore</button>
         <div class="menu-row">
           <button id="open-journal">Journal <span id="menu-found"></span></button>
@@ -40,6 +40,9 @@
           <div><kbd>Space</kbd> jump / fly up</div>
           <div><kbd>F</kbd> walk ⇄ fly</div>
           <div><kbd>C</kbd> fly down</div>
+          <div><kbd>E</kbd> ride / get off a horse</div>
+          <div><kbd>V</kbd> 1st ⇄ 3rd person</div>
+          <div><kbd>Wheel</kbd> zoom (3rd person)</div>
           <div><kbd>J</kbd> journal</div>
           <div><kbd>M</kbd> sound · <kbd>Esc</kbd> menu</div>
         </div>
@@ -47,6 +50,8 @@
           <div><b>Left thumb</b> move · push to the edge to run</div>
           <div><b>Right thumb</b> drag to look</div>
           <div><b>Fly</b> switch walk ⇄ fly</div>
+          <div><b>Ride</b> next to a saddled horse</div>
+          <div><b>3rd</b> / <b>1st</b> switch the view</div>
           <div class="hint-rotate">Turn your phone sideways for the best view</div>
         </div>
         <p class="menu-credits touch-only">
@@ -99,9 +104,11 @@
       <div id="status">
         <div><span class="label">Discovered</span> <b id="found-count">0 / 0</b></div>
         <div><span class="label">Mode</span> <b id="mode">Walk</b> <span class="muted keys-only">(F)</span></div>
+        <div><span class="label">View</span> <b id="view">1st person</b> <span class="muted keys-only">(V)</span></div>
       </div>
       <div id="crosshair"></div>
       <div id="toast" hidden></div>
+      <div id="prompt" hidden><kbd class="keys-only">E</kbd> <span id="prompt-text"></span></div>
     </div>
 
     <!-- touch controls -->
@@ -109,10 +116,12 @@
       <div class="touch-zone"></div>
       <div class="stick"><div class="stick-knob"></div></div>
       <div class="touch-top">
+        <button class="t-view" aria-label="Switch view">3rd</button>
         <button class="t-journal">Journal</button>
         <button class="t-pause" aria-label="Menu">❚❚</button>
       </div>
       <div class="touch-buttons">
+        <button class="t-ride" hidden>Ride</button>
         <button class="t-fly">Fly</button>
         <button class="t-down" aria-label="Fly down">▼</button>
         <button class="t-up">Jump</button>

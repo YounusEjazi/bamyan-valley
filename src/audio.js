@@ -1,6 +1,6 @@
 // Sound, synthesised with Web Audio (no files): wind that gusts and grows with altitude and
-// flying speed, running water near the river and streams, footsteps on dry ground, a thud
-// on landing and the discovery chime.
+// flying speed, running water near the river and streams, footsteps on dry ground, hoof
+// beats and a horse's snort, a thud on landing and the discovery chime.
 // Starts on the first click / tap (browsers require a gesture); M or the menu mutes it.
 const KEY = "bamyan.sound.v1";
 
@@ -152,6 +152,65 @@ export class Sound {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
     src.connect(f).connect(g).connect(this.master);
     src.start(t, 0, 0.3);
+  }
+
+  // one hoof on hard ground: a hollow knock and a click of grit; volume 0..1
+  hoof(volume, speed) {
+    if (!this.ctx || this.muted || volume < 0.01) return;
+    const ctx = this.ctx, t = ctx.currentTime + Math.random() * 0.015;
+    const v = volume * (0.7 + Math.min(speed, 15) * 0.03) * (0.8 + Math.random() * 0.4);
+    const o = ctx.createOscillator();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(170 + Math.random() * 70, t);
+    o.frequency.exponentialRampToValueAtTime(80, t + 0.09);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.2 * v, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+    o.connect(g).connect(this.master);
+    o.start(t);
+    o.stop(t + 0.14);
+    const src = ctx.createBufferSource();
+    src.buffer = this.white;
+    const f = ctx.createBiquadFilter();
+    f.type = "bandpass";
+    f.frequency.value = 1500 + Math.random() * 700;
+    f.Q.value = 1.1;
+    const g2 = ctx.createGain();
+    g2.gain.setValueAtTime(0.0001, t);
+    g2.gain.exponentialRampToValueAtTime(0.1 * v, t + 0.003);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+    src.connect(f).connect(g2).connect(this.master);
+    src.start(t, Math.random() * 0.8, 0.08);
+  }
+
+  // a horse blowing through its nose: fluttering, low noise
+  snort() {
+    if (!this.ctx || this.muted) return;
+    const ctx = this.ctx, t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = this.white;
+    const f = ctx.createBiquadFilter();
+    f.type = "bandpass";
+    f.frequency.setValueAtTime(700, t);
+    f.frequency.exponentialRampToValueAtTime(350, t + 0.6);
+    f.Q.value = 0.9;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.28, t + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
+    // the lips flutter: amplitude modulation at ~30 Hz
+    const flutter = ctx.createGain();
+    flutter.gain.value = 0.5;
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 28;
+    const depth = ctx.createGain();
+    depth.gain.value = 0.5;
+    lfo.connect(depth).connect(flutter.gain);
+    src.connect(f).connect(flutter).connect(g).connect(this.master);
+    src.start(t, 0, 0.75);
+    lfo.start(t);
+    lfo.stop(t + 0.75);
   }
 
   chime() {

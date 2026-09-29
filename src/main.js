@@ -1,6 +1,7 @@
 // Bamyan valley explorer. World: terrain + Buddha cliff + OSM town + trees (see world.js),
-// first-person walk/fly (player.js, touch.js), discoverable places (discovery.js),
-// atmosphere and grading (atmosphere.js, post.js), birds (life.js), sound (audio.js).
+// walk / ride / fly in first or third person (player.js, touch.js), people and horses
+// (crowd.js), discoverable places (discovery.js), atmosphere and grading (atmosphere.js,
+// post.js), birds (life.js), sound (audio.js).
 // Coordinates: 1 unit = 1 m, Y up, X east, -Z north, Y = elevation; origin = big Buddha niche.
 import * as THREE from "three";
 import { Sky } from "three/addons/objects/Sky.js";
@@ -12,6 +13,7 @@ import { Discovery } from "./discovery.js";
 import { Grass } from "./grass.js";
 import { Birds } from "./life.js";
 import { Water } from "./water.js";
+import { Crowd } from "./crowd.js";
 import { Pipeline } from "./post.js";
 import { TouchControls } from "./touch.js";
 import { Sound } from "./audio.js";
@@ -160,7 +162,8 @@ if (isTouch) $("play").textContent = "Tap to explore";
 // free). Losing the pointer lock or the tab just pauses: a small "click to continue" pill
 // on desktop, nothing on phones. Closing the journal / settings goes back to where they
 // were opened from.
-let world, player, discovery, grass, birds, touch, water;
+let world, player, discovery, grass, birds, touch, water, crowd;
+let nearHorse = null;
 let waterNear = 0;
 let started = false;      // the first "explore" click happened
 let playing = false;
@@ -173,8 +176,9 @@ const showPaused = () => { $("paused").hidden = isTouch || playing || !started |
 function setPlaying(on) {
   playing = on;
   if (player) player.enabled = on;
-  touch?.show(on);
+  touch?.show(on && isTouch);
   document.body.classList.toggle("playing", on);
+  $("prompt").hidden = !on || !promptText;
   if (on) {
     started = true;
     menuOpen = false;
@@ -231,38 +235,80 @@ function engage() {
   }
 }
 
+// E / the Ride button: get on the saddled horse in reach, or off the one being ridden
+function interact() {
+  if (!player || !playing) return;
+  if (player.mount) player.dismount();
+  else if (nearHorse && player.mode === "walk") {
+    player.ride(nearHorse);
+    rideHintUntil = performance.now() + 5000;
+    sound.snort();
+  }
+}
+
+// "E  Ride the horse" when one is in reach, "E  Get off" for a moment after mounting; on
+// touch screens a Ride / Get off button instead
+let promptText = "", rideLabel = null, rideHintUntil = 0;
+function updatePrompt(now) {
+  nearHorse = player.mode === "walk" ? crowd.mountable(player.feet) : null;
+  const text = player.mount ? (now < rideHintUntil ? `Get off the ${player.mount.sub}` : "")
+    : nearHorse ? `Ride the ${nearHorse.sub}` : "";
+  if (text !== promptText) {
+    promptText = text;
+    $("prompt-text").textContent = text;
+    $("prompt").hidden = !text || !playing;
+  }
+  const label = player.mount ? "Get off" : nearHorse ? "Ride" : null;
+  if (label !== rideLabel) {
+    rideLabel = label;
+    touch.setRide(label);
+  }
+}
+
 async function init() {
+  // rivers and streams: people keep out of them; the water itself is built after the world
+  // appears (below)
+  const waterReq = fetch("./models/water.json").then((r) => r.json()).catch((e) => console.warn("water", e));
   world = await loadWorld(renderer, tier, (text, f) => {
     $("loading-text").textContent = text;
     $("progress").style.width = `${Math.round(f * 100)}%`;
   });
+  // (no await between adding the world and setSun(): frames would draw it without a shadow map)
+  const waterData = await waterReq;
   scene.add(world.root);
   const hc = world.config.haze.color;
   scene.fog = new THREE.FogExp2(new THREE.Color().setRGB(hc[0], hc[1], hc[2]), FOG_DENSITY);
   const start = world.config.player_start;
   atmo.uFogBase.value = start.position[1] - 20;
 
+  grass = new Grass(scene, world, world.textures.core, world.ground.core.bounds, tier);
+  crowd = new Crowd(scene, world, tier, waterData, (x, z) => grass.sample(x, z));
+  crowd.onHoof = (v, speed) => sound.hoof(v, speed);
+
   player = new Player(camera, renderer.domElement, world);
   touch = new TouchControls(player, $("touch"), {
     onPause: openMenu,
     onJournal: () => showSheet("journal"),
+    onRide: interact,
   });
   player.onModeChange = (m) => {
-    $("mode").textContent = m === "fly" ? "Fly" : "Walk";
+    $("mode").textContent = { fly: "Fly", ride: "Ride", walk: "Walk" }[m];
     touch.setMode(m);
     pipeline.pause(1);
   };
+  const showView = (v) => {
+    $("view").textContent = v === "third" ? "3rd person" : "1st person";
+    document.body.classList.toggle("third", v === "third");
+    touch.setView(v);
+  };
+  player.onViewChange = showView;
+  showView(player.view);
+  player.onDismount = (h) => crowd.release(h);
   player.onStep = (s) => sound.step(s);
-  player.onLand = (v) => sound.land(v);
+  player.onLand = (v) => sound.land(v * (player.mode === "ride" ? 1.6 : 1));
   player.place(new THREE.Vector3(...start.position), new THREE.Vector3(...start.look_at), "walk");
 
-  grass = new Grass(scene, world, world.textures.core, world.ground.core.bounds, tier);
   birds = new Birds(scene, world, tier.birds);
-  // rivers and streams: built in the background after the world appears
-  fetch("./models/water.json").then((r) => r.json()).then((data) => {
-    water = new Water(scene, world, data, envTarget.texture);
-    return water.build();
-  }).catch((e) => console.warn("water", e));
   discovery = new Discovery(scene, world.pois, ui);
   const updateMenuCount = () => { $("menu-found").textContent = `(${discovery.count}/${world.pois.length})`; };
   discovery.onChange = updateMenuCount;
@@ -303,6 +349,10 @@ async function init() {
   $("sun-az").oninput = (e) => setSun(+e.target.value, sunState.el);
   $("sun-el").oninput = (e) => setSun(sunState.az, +e.target.value);
   setSun(...(world.config.sun.late_afternoon || world.config.sun.photo));   // long shadows show the cliff best
+  if (waterData) {
+    water = new Water(scene, world, waterData, envTarget.texture);
+    water.build().catch((e) => console.warn("water", e));
+  }
 
   // graphics quality (reloads) and sound
   const q = $("quality");
@@ -350,6 +400,7 @@ async function init() {
       sound.setMuted(!sound.muted);
       showSound();
     }
+    if (e.code === "KeyE" && playing && !e.repeat) interact();
   });
   document.addEventListener("visibilitychange", () => {
     // phones: just let go of the sticks; desktop loses the pointer lock by itself (-> paused)
@@ -359,13 +410,13 @@ async function init() {
 
   world.trees.update(camera.position, true);
   if (import.meta.env.DEV) {
-    window.bamyan = { THREE, scene, camera, world, player, discovery, grass, birds, renderer, pipeline, setSun, atmo, tier, travel, get water() { return water; } };
+    window.bamyan = { THREE, scene, camera, world, player, discovery, grass, birds, crowd, renderer, pipeline, setSun, atmo, tier, travel, get water() { return water; } };
   }
   $("hud").hidden = false;
   $("menu").hidden = false;
   $("loading").classList.add("done");
   pipeline.pause(3);
-  console.info(`world ready: ${world.stats.trees} trees, ${world.stats.buildings} building tiles, quality ${tierName}, reversed depth ${pipeline.reversed}`);
+  console.info(`world ready: ${world.stats.trees} trees, ${world.stats.buildings} building tiles, ${crowd.stats.people} people, ${crowd.stats.horses} horses, quality ${tierName}, reversed depth ${pipeline.reversed}`);
 }
 
 // ------------------------------------------------------------------ loop
@@ -382,6 +433,11 @@ renderer.setAnimationLoop((now) => {
   atmo.uWind.value = 0.55 + 0.3 * Math.sin(gustPhase * 0.23) + 0.2 * Math.sin(gustPhase * 0.61 + 1.3);
   if (player) {
     player.update(dt);
+    crowd.pushPlayer(player);
+    crowd.update(dt, atmo.uTime.value, player, sunState.dir, camera.position);
+    if (player.mount) player.rideEye = crowd.riderEye;
+    player.updateCamera(dt);
+    updatePrompt(now);
     discovery.update(now, player.feet, player.heading());
     // grass only near the ground (walking or low flight)
     const g = world.groundHeight(player.feet.x, player.feet.z, world.groundOnly, player.feet.y + 400);

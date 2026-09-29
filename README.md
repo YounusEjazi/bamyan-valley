@@ -3,10 +3,13 @@
 An explorable 3D model of the Bamyan valley in Afghanistan and the cliff of the two
 destroyed Buddha statues, built with [three.js](https://threejs.org/).
 
-Walk the fields and the town below the cliff, climb to the niches or fly over the valley,
-and find the 14 places hidden around it: the Great and Small Buddha niches, the cave
-monasteries, the cliff top, the Bamian River, the bazaar, Shahr-i Ghulghula and more.
-Each discovery adds an entry to your journal. Works on desktop and on phones / tablets.
+Walk the fields and the town below the cliff, ride a horse, climb to the niches or fly over
+the valley, in first or third person, and find the 14 places hidden around it: the Great
+and Small Buddha niches, the cave monasteries, the cliff top, the Bamian River, the bazaar,
+Shahr-i Ghulghula and more. Each discovery adds an entry to your journal. The valley is
+lived in: villagers in the bazaar and at the shrine, farmers in the fields, visitors at the
+niches, children by the river, horses and donkeys grazing, and horsemen on the tracks.
+Works on desktop and on phones / tablets.
 
 ## Run it
 
@@ -25,21 +28,30 @@ Then open http://localhost:5173 and click **Click to explore** (on a phone: **Ta
 | --- | --- | --- |
 | W A S D / arrows | left thumb (floating stick) | move |
 | Mouse | right thumb, drag | look |
-| Shift | push the stick to its edge | run / fly fast |
-| Space | **Jump** / **▲** | jump / fly up |
+| Shift | push the stick to its edge | run / gallop / fly fast |
+| Space | **Jump** / **▲** | jump (also on horseback) / fly up |
 | C | **▼** | fly down |
 | F | **Fly** / **Walk** | switch walk / fly |
+| E | **Ride** / **Get off** | get on a saddled horse or donkey next to you / get off |
+| V | **3rd** / **1st** | first / third person view |
+| Mouse wheel | | zoom the third-person camera |
 | J | **Journal** | journal |
 | M | menu → Sound | sound on / off |
 | Esc (twice) | **❚❚** | menu (viewpoints, sun, quality) |
 
 Pressing Esc once frees the mouse and pauses; click the view to continue.
 
+Saddled horses wait in front of the Great Buddha (more graze in the fields and stand in the
+bazaar). On horseback, W or the stick sends the horse where you look; it turns toward that
+direction, canters, gallops with Shift (or the stick at its edge) and jumps with Space.
+Donkeys are smaller and slower. Getting off leaves the horse where it is.
+
 ## Graphics quality
 
 Phones start on **Medium**, desktops on **High**; change it under *Views & settings*
 (or with `?q=low|medium|high`). The tier sets resolution, MSAA, shadow map size and range,
-tree / grass density and draw distances, detail normal maps and light-shaft samples. On top
+tree / grass density and draw distances, detail normal maps, light-shaft samples, and how
+many people and animals there are and how far away they are drawn. On top
 of that the renderer lowers its internal resolution when the frame rate drops and raises
 it again when there is room. `?touch=1` shows the touch controls on a desktop.
 
@@ -69,7 +81,20 @@ In the browser (`src/`):
   flutter and let the sun shine through; further away, solid crowns (which also cast the
   shadows).
 - **Life**: grass bending under gusts, birds over the niches and fields (`life.js`), flowing
-  water (`water.js`), synthesised wind, water and footstep sounds (`audio.js`).
+  water (`water.js`), synthesised wind, water, footstep and hoof sounds (`audio.js`).
+- **People and horses** (`people.js`, `horses.js`, `crowd.js`): no model files. Each is built
+  from simple shapes on a small skeleton (`rig.js`): men in shalwar kameez with a waistcoat
+  and a pakol or turban, women in long dresses and headscarves (some in a blue chadari),
+  children, visitors; bay, chestnut, grey and dun horses and donkeys, some with a saddle and
+  a red saddle blanket. Walks, runs, gaits from walk to gallop, grazing, talking, waving,
+  pointing at the cliff and working in the fields are posed in code. All people are one
+  instanced draw call and all horses another: each frame the bone matrices and clothing
+  colours go into a float texture that the vertex shader reads per instance. They wander
+  their own area on open, gentle ground (never through houses or the river), and soft
+  shadows under them lean away from the sun.
+- **Player** (`player.js`): first or third person (a camera over the shoulder that is pulled
+  in by walls), and riding: the horse turns toward where you steer, blends its gait with its
+  speed and stops at walls.
 - **Rendering** (`post.js`): an HDR target with MSAA and a reversed float depth buffer, then
   one pass for light shafts, sun glare, white balance, tone mapping and a filmic grade.
 
